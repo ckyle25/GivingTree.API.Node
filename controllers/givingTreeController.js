@@ -1,4 +1,11 @@
-
+// const nodemailer = require('nodemailer')
+// const transporter = nodemailer.createTransport({
+//     service: 'gmail',
+//     auth: {
+//       user: process.env.EMAIL_SERVICE_USERNAME,
+//       pass: process.env.EMAIL_SERVICE_PASSWORD
+//     }
+//   });
 
 module.exports = {
     getCards: (req, res, next) => {
@@ -18,6 +25,7 @@ module.exports = {
     reserveCard: (req, res, next) => {
         const body = req.body;
         const dbInstance = req.app.get('db')
+        const transporterInstance = req.app.get('transporter')
 
         myQuery = `
         UPDATE givingtree.cards
@@ -39,11 +47,24 @@ module.exports = {
                         if (err) {
                             return res.status(400).send(["Reservation Failed"])
                         } else {
+                            const mailOptions = {
+                                from: 'Giving Tree <syc4thgivingtree@gmail.com>',
+                                to: body.email,
+                                subject: `Thank You for Your Reservation`,
+                                text: `This email is to confirm your reservation for \n\n${result.rows[0].cardtitletxt}\n${result.rows[0].carddsc}\n\nPlease be sure to give your reserved items to Viviann Carlsen by (insert date here)\n\nThank you again for your participation.\n\nMerry Christmas!\n\n-Sycamores 4th Ward Giving Tree`
+                              };
+              
+                              transporterInstance.sendMail(mailOptions, (error, info) => {
+                                if (error) {
+                                  return res.status(200).send(result.rows)
+                                }
+                              });
+                            
                             return res.status(200).send(result.rows)
                         }
                     })
                 } else {
-                    return res.status(200).send(["Already reserved"])
+                    return res.status(400).send(["Already reserved"])
                 }
             }
         })
@@ -62,7 +83,6 @@ module.exports = {
         RETURNING *
         `
         values = [body.cardid]
-
 
         dbInstance.query('SELECT reservedflg FROM givingtree.cards WHERE cardid = $1', [body.cardid], (err, checkResult) => {
             if (err) {
