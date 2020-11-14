@@ -48,7 +48,7 @@ module.exports = {
                             return res.status(400).send(["Reservation Failed"])
                         } else {
                             const mailOptions = {
-                                from: 'Giving Tree <syc4thgivingtree@gmail.com>',
+                                from: 'Giving Tree <automatic@givingtree.cornwallia.com>',
                                 to: body.email,
                                 subject: `Thank You for Your Reservation`,
                                 text: `This email is to confirm your reservation for \n\n${result.rows[0].cardtitletxt}\n${result.rows[0].carddsc}\n\nPlease be sure to give your reserved items to Viviann Carlsen by (insert date here)\n\nThank you again for your participation.\n\nMerry Christmas!\n\n-Sycamores 4th Ward Giving Tree`
